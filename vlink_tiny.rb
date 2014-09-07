@@ -10,7 +10,7 @@ class VLinkTiny
 
   def initialize(interface)
     @eth_p_all_hbo = [ ETH_P_ALL ].pack('S>').unpack('S').first
-    @raw = Socket.open(AF_PACKET, Socket::SOCK_RAW, @eth_p_all_hbo)
+    @raw = Socket.open(Socket::AF_PACKET, Socket::SOCK_RAW, @eth_p_all_hbo)
 
     # Use an ioctl to get the MAC address of the provided interface
     ifreq = [ interface ].pack('a32')
@@ -24,7 +24,7 @@ class VLinkTiny
 
     # Construct our sockaddr_ll structure.  This is defined in
     # linux/if_packet.h, and it requires the interface index
-    @sll = [ AF_PACKET ].pack('S')    # needs to be in HBO
+    @sll = [ Socket::AF_PACKET ].pack('S')
     @sll << [ ETH_P_ALL ].pack('S>')  # needs to be in NBO
     @sll << index_str    # ifr_ifindex field of ifreq structure
     @sll << ("\x00" * 12)
