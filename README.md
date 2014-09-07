@@ -18,7 +18,7 @@ None.  That's the point.
 
 ### License
 
-Public domain.  Enjoy.
+Public domain.
 
 ### Example
 
@@ -54,7 +54,7 @@ The VLink initializer manually crafts the arguments and structures normally foun
 
 ### Why do you include a pseudo-random number generator?
 
-Determinism.  We use VLink as a QA tool, and we fields like IPv4 fragment IDs and TCP SEQ numbers to be consistent from one invocation to the next.
+Determinism.  We use VLink as a QA tool, and we want fields like IPv4 fragment IDs and TCP SEQ numbers to be consistent from one invocation to the next.
 
 ### Do you have an ultra-minimalist version of the library available?
 
