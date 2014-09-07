@@ -25,7 +25,6 @@ Public domain.  Enjoy.
 ```ruby
 # Be an ill-behaved network citizen and claim ownership of all IP addresses
 # using ARP.
-
 require_relative 'vlink.rb'
 
 link = VLink.new(ARGV.first || 'eth0')

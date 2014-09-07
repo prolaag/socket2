@@ -1,4 +1,3 @@
-#!/usr/bin/env ruby
 # encoding: ASCII-8BIT
 
 require 'socket'
@@ -35,40 +34,42 @@ require 'ipaddr'
 #    :sender/target_mac - six byte NBO mac address for ARP packets
 #    :sender/target_ip - IPv4 (not IPv6) address for ARP packets
 class VLink
-  ETH_P_ALL_HBO   = 0x03_00   # linux/if_ether.h (but in host byte order)
+  ETH_P_ALL       = 0x00_03   # linux/if_ether.h
   SIOCGIFINDEX    = 0x89_33   # bits/ioctls.h
   SIOCGIFHWADDR   = 0x89_27   # linux/sockios.h
   IFR_HWADDR_OFF  = 18        # offset of MAC data in ifreq struct
-  AF_INET         = Socket::AF_INET    # 2
-  AF_INET6        = Socket::AF_INET6   # 10
-  AF_PACKET       = Socket::AF_PACKET  # 17
+  AF_INET         = Socket::AF_INET       #  2
+  AF_INET6        = Socket::AF_INET6      # 10
+  AF_PACKET       = Socket::AF_PACKET     # 17
   LCG_A           = 6364136223846793005
   LCG_C           = 1442695040888963407
-  IP_PROTO_TCP    = 6
-  IP_PROTO_UDP    = 17
-  IP_PROTO_ICMP   = 1
+  IP_PROTO_TCP    = Socket::IPPROTO_TCP   #  6
+  IP_PROTO_UDP    = Socket::IPPROTO_UDP   # 17
+  IP_PROTO_ICMP   = Socket::IPPROTO_ICMP  #  1
   ETHERTYPE_IP    = 0x0800
   ETHERTYPE_IPV6  = 0x86dd
   ETHERTYPE_ARP   = 0x0806
 
   def initialize(interface)
     @pseed = 2147483587
-    @raw = Socket.open(AF_PACKET, Socket::SOCK_RAW, ETH_P_ALL_HBO)
+    @eth_p_all_hbo = [ ETH_P_ALL ].pack('S>').unpack('S').first
+    @raw = Socket.open(AF_PACKET, Socket::SOCK_RAW, @eth_p_all_hbo)
 
-    # Use ioctl() to get the MAC address of the provided interface
+    # Use an ioctl to get the MAC address of the provided interface
     ifreq = [ interface ].pack('a32')
     @raw.ioctl(SIOCGIFHWADDR, ifreq)
-    @src_mac = ifreq[18,6]
+    @src_mac = ifreq[IFR_HWADDR_OFF, 6]
     @dst_mac = "\xff" * 6    # broadcast by default
 
+    # Also get the system's internal interface index value
     ifreq = [ interface ].pack('a32')
     @raw.ioctl(SIOCGIFINDEX, ifreq)
     index_str = ifreq[16, 4]
 
     # Construct our sockaddr_ll structure.  This is defined in
     # linux/if_packet.h, and it requires the interface index
-    @sll = [ AF_PACKET ].pack('S')
-    @sll << [ ETH_P_ALL_HBO ].pack('S')
+    @sll = [ AF_PACKET ].pack('S')    # needs to be in HBO
+    @sll << [ ETH_P_ALL ].pack('S>')  # needs to be in NBO
     @sll << index_str    # ifr_ifindex field of ifreq structure
     @sll << ("\x00" * 12)
 
@@ -77,10 +78,10 @@ class VLink
     # works for both.  So that's all we call.
     # @raw.setsockopt(Socket::SOL_SOCKET, Socket::SO_BINDTODEVICE, interface)
     # @raw.getsockopt(Socket::SOL_SOCKET, Socket::SO_RCVBUF).inspect
-    @raw.bind(@sll) if interface
+    @raw.bind(@sll)
   end
   attr_accessor :src_mac, :dst_mac
-  attr_reader :raw, :housekeeper
+  attr_reader :raw
 
 
   ##  Core injection and reception functions  ##
