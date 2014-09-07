@@ -58,4 +58,4 @@ Determinism.  We use VLink as a QA tool, and we fields like IPv4 fragment IDs an
 
 ### Do you have an ultra-minimalist version of the library available?
 
-Naturally.  vlink_tiny.rb
+[vlink_tiny.rb](vlink_tiny.rb)
