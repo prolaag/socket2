@@ -31,6 +31,7 @@ require 'ipaddr'
 #    :flags - array of TCP flags to be set on segments, :syn, :ack, :fin, :rst
 #    :seq - sequence number (TCP only)
 #    :ack - acknowledgement number (TCP only)
+#    :window - flow control window to advertise (TCP only, defaults to 0x8000)
 #    :sender/target_mac - six byte NBO mac address for ARP packets
 #    :sender/target_ip - IPv4 (not IPv6) address for ARP packets
 class VLink
@@ -215,9 +216,10 @@ class VLink
 
   # Create a TCP segment with the provided payload
   def segment(payload, opts = {})
-    src_port = (opts[:src_port]).to_i
-    dst_port = (opts[:dst_port]).to_i
+    src_port = opts[:src_port].to_i
+    dst_port = opts[:dst_port].to_i
     seq, ack = opts[:seq].to_i, opts[:ack].to_i
+    fw = opts.fetch(:window, 0x8000)
 
     # Validate our flags
     flags = opts.fetch(:flags, [:ack])
@@ -226,15 +228,16 @@ class VLink
     end
     ack = 0 unless flags.include?(:ack)
 
-    # Construct the segment
-    seg = [src_port].pack('S>') + [dst_port].pack('S>')   # src + dst port
+    # Construct the segment, starting with src and dst ports
+    seg = [src_port].pack('S>') + [dst_port].pack('S>')
     seg << [seq].pack('L>') + [ack].pack('L>')         # sequence numbers
     flag_bits = 0
     flag_bits |= 0x01 if flags.include?(:fin)
     flag_bits |= 0x02 if flags.include?(:syn)
     flag_bits |= 0x04 if flags.include?(:rst)
+    flag_bits |= 0x08 if flags.include?(:psh)
     flag_bits |= 0x10 if flags.include?(:ack)
-    seg << "\x50#{flag_bits.chr}\x80\x00"              # hdr_len, flags, window
+    seg << "\x50#{flag_bits.chr}#{[fw].pack('S>')}"    # hdr_len, flags, window
     seg << "\x00\x00\x00\x00"                          # checksum, URG pointer
     seg << payload.to_s
     return packet(IP_PROTO_TCP, seg, opts) unless opts[:norecurse]
@@ -376,6 +379,7 @@ class VLink
     flags << :fin if (flag_bits & 0x01) != 0
     flags << :syn if (flag_bits & 0x02) != 0
     flags << :rst if (flag_bits & 0x04) != 0
+    flags << :psh if (flag_bits & 0x08) != 0
     flags << :ack if (flag_bits & 0x10) != 0
     opts[:payload] = data[hdr_len..-1]
     opts[:protocol] = :tcp
