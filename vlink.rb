@@ -12,6 +12,7 @@ require 'ipaddr'
 #    packet() - send a properly formatted IPv4/6 packet with a given payload
 #    segment() - send a TCP segment with the given payload
 #    datagram() - send a UDP datagram with the given payload
+#    control_message() - send an ICMP packet
 #    arp() - send an ARP request or reply
 #    unparse() - send a packet and option hash exactly as produced by parse()
 #
@@ -29,6 +30,7 @@ require 'ipaddr'
 #    :norecurse - flag indicating non-recursive construction
 #    :noinject - flag that no injection should be performed, only construction
 #    :flags - array of TCP flags to be set on segments, :syn, :ack, :fin, :rst
+#    :frag - hash of fragmentation options, :df, :mf, and :offset
 #    :seq - sequence number (TCP only)
 #    :ack - acknowledgement number (TCP only)
 #    :window - flow control window to advertise (TCP only, defaults to 0x8000)
