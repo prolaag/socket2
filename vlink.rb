@@ -53,8 +53,19 @@ class VLink
   ETHERTYPE_IPV6  = 0x86dd
   ETHERTYPE_ARP   = 0x0806
 
+  # Provide the name of a physical interface (eth0), or nil if you don't
+  # want to bind to an interface at all.
   def initialize(interface)
     @pseed = 2147483587
+    @dst_mac = "\xff" * 6    # broadcast by default
+
+    # Without an interface use a dummy source MAC
+    unless interface
+      @src_mac = "SRCMAC"
+      return nil
+    end
+
+    # Open our layer-2 raw socket
     @eth_p_all_hbo = [ ETH_P_ALL ].pack('S>').unpack('S').first
     @raw = Socket.open(AF_PACKET, Socket::SOCK_RAW, @eth_p_all_hbo)
 
@@ -62,7 +73,6 @@ class VLink
     ifreq = [ interface ].pack('a32')
     @raw.ioctl(SIOCGIFHWADDR, ifreq)
     @src_mac = ifreq[IFR_HWADDR_OFF, 6]
-    @dst_mac = "\xff" * 6    # broadcast by default
 
     # Also get the system's internal interface index value
     ifreq = [ interface ].pack('a32')
@@ -92,12 +102,12 @@ class VLink
   # Send raw data out of our little socket.  Provide an ethernet frame
   # starting at the 6-byte destination MAC address.
   def inject(frame)
-    @raw.send(frame, Socket::SOCK_RAW, @sll)
+    @raw.send(frame, Socket::SOCK_RAW, @sll) if @raw
   end
 
   # Receive and return one raw frame.
   def recv
-    @raw.recvfrom(4000).first
+    @raw.recvfrom(4000).first if @raw
   end
 
 
