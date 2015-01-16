@@ -4,12 +4,13 @@ require_relative '../vlink.rb'
 
 # Fetch all broadcast UDP traffic and dump the payloads to stdout
 link = VLink.new(ARGV.first || 'eth0')
-loop do
-  pkt = link.parse(link.recv)           # brab and parse each packet
-  dst = link.ip_addr(0xFFFFFFFF)
+broadcast = link.ip_addr(0xFFFFFFFF)
 
-  # For every ARP request...
-  if pkt[:protocol] == :udp and pkt[:dst_ip] == dst
+loop do
+  pkt = link.parse(link.recv)           # grab and parse each packet
+
+  # For every UDP packet bound for the broadcast address...
+  if pkt[:protocol] == :udp and pkt[:dst_ip] == broadcast
     $stdout.print(pkt[:payload])
   end
 end

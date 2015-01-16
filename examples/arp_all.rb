@@ -6,7 +6,7 @@ require_relative '../vlink.rb'
 # using ARP.
 link = VLink.new(ARGV.first || 'eth0')
 loop do
-  pkt = link.parse(link.recv)           # brab and parse each packet
+  pkt = link.parse(link.recv)           # grab and parse each packet
 
   # For every ARP request...
   if pkt[:protocol] == :arp and pkt[:operation] == :request

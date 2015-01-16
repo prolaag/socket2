@@ -70,12 +70,12 @@ class VLink
     @raw = Socket.open(AF_PACKET, Socket::SOCK_RAW, @eth_p_all_hbo)
 
     # Use an ioctl to get the MAC address of the provided interface
-    ifreq = [ interface ].pack('a32')
+    ifreq = [ interface, '' ].pack('a16a16')
     @raw.ioctl(SIOCGIFHWADDR, ifreq)
     @src_mac = ifreq[IFR_HWADDR_OFF, 6]
 
     # Also get the system's internal interface index value
-    ifreq = [ interface ].pack('a32')
+    ifreq = [ interface, '' ].pack('a16a16')
     @raw.ioctl(SIOCGIFINDEX, ifreq)
     index_str = ifreq[16, 4]
 
