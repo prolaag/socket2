@@ -29,7 +29,7 @@ require_relative 'vlink.rb'
 
 link = VLink.new(ARGV.first || 'eth0')
 loop do
-  pkt = link.parse(link.recv)           # brab and parse each packet
+  pkt = link.parse(link.recv)           # grab and parse each packet
 
   # For every ARP request...
   if pkt[:protocol] == :arp and pkt[:operation] == :request
@@ -43,7 +43,7 @@ end
 
 ### How does it work?
 
-The VLink initializer manually crafts the arguments and structures normally found in linux/if_ether.h, bits/ioctls.h, and linux/sockios.h - in particular the sockaddr_ll (link layer) address structure and ifreq interface indexing structure.  Ruby 1.9 doesn't define these structures for you, but if you assemble the raw memory representations of those structures yourself, Ruby will pass them along through the ioctl() calls necessary to operate at layer 2.
+The VLink initializer manually crafts the arguments and structures normally found in linux/if_ether.h, bits/ioctls.h, and linux/sockios.h - in particular the sockaddr_ll (link layer) address structure and ifreq interface indexing structure.  Ruby 1.9 doesn't define these structures for you, but we assemble the raw memory representations of those structures ourselves and Ruby passes them along through the ioctl() calls necessary to operate at layer 2.
 
 ### For which protocols do you provide additional, high-level support?
 - IPv4
