@@ -3,13 +3,13 @@ vlink
 
 Layer-2 raw packet manipulation in Ruby (for Linux)
 
-Ruby only natively supports raw socket access at the network (IP) layer.  This is fine if you want the system to perform services on your behalf such as address resolution, but those of us who want complete control have only been left with options that take us out of pure Ruby space.
+Ruby only natively supports raw socket access at the network (IP) layer.  This is fine if you want the system to perform services on your behalf such as address resolution, but those who want complete control have only been left with options that take us out of pure Ruby space.
 
 This single-file, pure-Ruby class provides an alternative: Access to raw sockets at the data-link (Ethernet) layer without an intermediary like libpcap.
 
 ### Dependencies
 
-None.  That's the point.
+None.
 
 ### Platform
 
