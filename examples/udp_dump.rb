@@ -11,7 +11,7 @@ loop do
 
   # For every UDP packet bound for the broadcast address...
   if pkt[:protocol] == :udp and pkt[:dst_ip] == broadcast
-    $stdout.print(pkt[:payload])
+    puts pkt[:payload].inspect
   end
 end
     
