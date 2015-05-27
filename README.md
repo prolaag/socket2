@@ -1,7 +1,7 @@
 socket2
 =======
 
-Extension to the native Socket class that allows layer-2 raw packet manipulation in Ruby (for Linux)
+Addition to the native Socket class that allows layer-2 raw packet manipulation in Ruby (for Linux)
 
 Ruby only natively supports raw socket access at the network (IP) layer. This is fine if you want the system to perform services on your behalf such as address resolution, but those who want complete control have only been left with options that take us out of pure Ruby space.
 
@@ -18,7 +18,7 @@ None.
 
 ### License
 
-Public domain.
+MIT
 
 ### Example
 

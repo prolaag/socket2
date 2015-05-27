@@ -1,3 +1,7 @@
+module Socket2
+  VERSION = "0.1.0"
+end
+
 require 'socket'
 
 class Socket
@@ -44,4 +48,4 @@ end
 #
 # License
 # -------
-# Public domain
+# MIT
