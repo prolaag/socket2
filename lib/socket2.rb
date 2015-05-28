@@ -21,7 +21,8 @@ class Socket
 
     # Build our sockaddr_ll struct so we can bind to this interface. The struct
     # is defined in linux/if_packet.h and requires the interface index.
-    sll = [ Socket::AF_PACKET, ETH_P_ALL, index_str ].pack('SS>a16')
+    eth_p_all_hbo = [ ETH_P_ALL ].pack('S').unpack('S>').first
+    sll = [ Socket::AF_PACKET, eth_p_all_hbo, index_str ].pack('SS>a16')
     self.bind(sll)
   end
 
