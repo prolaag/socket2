@@ -1,6 +1,6 @@
 # encoding: ASCII-8BIT
 
-require 'socket'
+require_relative 'vlink'
 require 'ipaddr'
 
 # This class provides raw, layer-2 packet access to a single device.

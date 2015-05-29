@@ -1,9 +1,9 @@
-vlink
-=====
+socket2
+=======
 
-Layer-2 raw packet manipulation in Ruby (for Linux)
+Addition to the native Socket class that allows layer-2 raw packet manipulation in Ruby (for Linux)
 
-Ruby only natively supports raw socket access at the network (IP) layer.  This is fine if you want the system to perform services on your behalf such as address resolution, but those who want complete control have only been left with options that take us out of pure Ruby space.
+Ruby only natively supports raw socket access at the network (IP) layer. This is fine if you want the system to perform services on your behalf such as address resolution, but those who want complete control have only been left with options that take us out of pure Ruby space.
 
 This single-file, pure-Ruby class provides an alternative: Access to raw sockets at the data-link (Ethernet) layer without an intermediary like libpcap.
 
@@ -18,44 +18,26 @@ None.
 
 ### License
 
-Public domain.
+MIT
 
 ### Example
 
 ```ruby
-# Be an ill-behaved network citizen and claim ownership of all IP addresses
-# using ARP.
-require_relative 'vlink.rb'
+require_relative 'socket2.rb'
 
-link = VLink.new(ARGV.first || 'eth0')
-loop do
-  pkt = link.parse(link.recv)           # grab and parse each packet
+# Create a layer-2 socket in a mostly familiar way
+sock = Socket.new(Socket::AF_PACKET, Socket::SOCK_RAW, Socket::ETH_P_ALL)
 
-  # For every ARP request...
-  if pkt[:protocol] == :arp and pkt[:operation] == :request
-    reply = link.reverse(pkt)           # base our reply off the request
-    reply[:sender_mac] = link.src_mac   # claim that IP belongs to our MAC
-    reply[:operation] = :reply          # indicate to ARP that this is a reply
-    link.unparse(reply)                 # send the packet
-  end
-end
+# Bind that socket to an interface
+sock.bind_if(ARGV.first || 'eth0')
+
+# Receive a packet starting at the beginning of its Ethernet header
+payload, peer_addr = sock.recvfrom(1514)
+
+# Send out that same raw packet
+sock.send(payload, 0)
 ```
 
 ### How does it work?
 
-The VLink initializer manually crafts the arguments and structures normally found in linux/if_ether.h, bits/ioctls.h, and linux/sockios.h - in particular the sockaddr_ll (link layer) address structure and ifreq interface indexing structure.  Ruby 1.9 doesn't define these structures for you, but we assemble the raw memory representations of those structures ourselves and Ruby passes them along through the ioctl() calls necessary to operate at layer 2.
-
-### For which protocols do you provide additional, high-level support?
-- IPv4
-- TCP
-- UDP
-- ARP
-- ICMP
-
-### Why do you include a pseudo-random number generator?
-
-Determinism.  We use VLink as a QA tool, and we want fields like IPv4 fragment IDs and TCP SEQ numbers to be consistent from one invocation to the next.
-
-### Do you have an ultra-minimalist version of the library available?
-
-[vlink_tiny.rb](vlink_tiny.rb)
+This file opens the Socket class and adds three constants and one method to support layer-2 raw sockets. The ```bind_if()``` method manually crafts the arguments and structures normally found in linux/if_ether.h, bits/ioctls.h, and linux/sockios.h - in particular the sockaddr_ll (link layer) address structure and ifreq interface indexing structure. Ruby 1.9 doesn't define these structures for you, but we assemble the raw memory representations of those structures ourselves and Ruby passes them along through the necessary ioctl() calls.

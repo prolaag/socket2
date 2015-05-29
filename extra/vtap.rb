@@ -4,7 +4,7 @@ require 'socket'
 
 # This class creates a non-persistent TAP device on your system and provides
 # raw, layer-2 packet access to it.
-class VTapTiny
+class VTap
   ETH_P_ALL       =     0x0003        # linux/if_ether.h
   SIOCGIFHWADDR   =     0x8927        # linux/sockios.h
   IFF_TAP         =     0x0002        # linux/if_tun.h

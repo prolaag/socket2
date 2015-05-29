@@ -3,7 +3,7 @@
 require 'socket'
 
 # This class provides raw, layer-2 packet access - no more, no less.
-class VLinkTiny
+class VLink
   ETH_P_ALL       = 0x0003   # linux/if_ether.h
   SIOCGIFINDEX    = 0x8933   # bits/ioctls.h
   SIOCGIFHWADDR   = 0x8927   # linux/sockios.h
